@@ -1,0 +1,108 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+    <script src="~/Scripts/jquery-1.6.4.min.js"></script>
+    <script src="~/Scripts/jquery.signalR-2.4.1.min.js"></script>
+    <!--引用自动生成的SignalR 集线器(Hub)脚本.在运行的时候在浏览器的Source下可看到 -->
+    <script src="~/signalr/hubs"></script>
+    <script>
+        // 引用自动生成的集线器代理
+        var svr = $.connection.datahub;
+        $(function () {
+            
+            // 定义服务器端调用的客户端sendMessage来显示新消息
+
+            svr.client.sendMessage = function (x) {
+                GetList();
+            };
+
+            // 开始连接服务器
+            $.connection.hub.start().done(function () {
+                $('#btnNew').click(function () {
+                    // 调用服务器端集线器的Send方法
+                    svr.server.send("n");
+                });
+            });
+            GetList();
+        });
+
+        function catchBill(id) {
+            svr.server.send("c:" + id);
+        }
+
+        function GetList() {
+            $("#tabList tbody").html("");
+            $.get("QryList", function (r) {
+                var s = JSON.parse(r);
+                var c = 0;
+                $.each(s, function (i, v) {
+                    var result = "";
+                    result += "<tr>";
+                    result += "<td>" + idContent(this.id, this.state) + "</td>";
+                    result += "<td>" + this.amount + "</td>";
+                    result += "<td>" + this.ctime + "</td>";
+                    result += "<td>" + stateContent(this.state) + "</td>";
+                    result += "<td></td>";
+                    result += "<td></td>";
+                    result += "</tr>";
+                    $("#tabList tbody").append(result);
+                    c++;
+                });
+                $("#spCount").text(c);
+            });
+        }
+
+        function idContent(id, state) {
+            if (state == 0) {
+                return "<a href=\"javacript:void(0);\" onclick=\"catchBill('" + id + "')\">" + id + "</a>";
+            }
+            return id;
+        }
+
+        function stateContent(st) {
+            switch (st) {
+                case 0:
+                    return "<span style=\"color: red\">未处理</span>";
+                case 1:
+                    return "受理中";
+                case 2:
+                    return "成功";
+                case 3:
+                    return "失败";
+            }
+            return "";
+        }
+    </script>
+</head>
+<body>
+    <div> 
+        当前入款
+        <input id="btnNew" type="button" value="NewOne" />
+        <span id="spCount"></span>
+    </div>
+    
+    <table id="tabList">
+        <thead>
+            <tr>
+                <th>单号</th>
+                <th>金额</th>
+                <th>提交时间</th>
+                <th>状态</th>
+                <th>处理时间</th>
+                <th>受理人</th>
+            </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+    </table>
+</body>
+</html>
