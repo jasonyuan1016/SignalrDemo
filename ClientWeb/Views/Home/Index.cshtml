@@ -19,7 +19,7 @@
         $(function () {
             
             // 定义服务器端调用的客户端sendMessage来显示新消息
-
+            
             svr.client.sendMessage = function (x) {
                 GetList();
             };
@@ -27,15 +27,18 @@
             // 开始连接服务器
             $.connection.hub.start().done(function () {
                 $('#btnNew').click(function () {
-                    // 调用服务器端集线器的Send方法
-                    svr.server.send("n");
+                    $.post("Insert", function (r) {
+                        svr.server.send("n");
+                    });
                 });
             });
             GetList();
         });
 
         function catchBill(id) {
-            svr.server.send("c:" + id);
+            $.post("CatchBill", { _id: id }, function (r) {
+                svr.server.send("c");
+            });
         }
 
         function GetList() {
@@ -50,8 +53,9 @@
                     result += "<td>" + this.amount + "</td>";
                     result += "<td>" + this.ctime + "</td>";
                     result += "<td>" + stateContent(this.state) + "</td>";
-                    result += "<td></td>";
-                    result += "<td></td>";
+                    result += "<td>" + this.creater + "</td>";
+                    result += "<td>" + this.utime + "</td>";
+                    result += "<td>" + this.modifier + "</td>";
                     result += "</tr>";
                     $("#tabList tbody").append(result);
                     c++;
@@ -84,7 +88,8 @@
 </head>
 <body>
     <div> 
-        当前入款
+        当前用户：
+        @ViewData["uid"]
         <input id="btnNew" type="button" value="NewOne" />
         <span id="spCount"></span>
     </div>
@@ -96,6 +101,7 @@
                 <th>金额</th>
                 <th>提交时间</th>
                 <th>状态</th>
+                <th>提交人</th>
                 <th>处理时间</th>
                 <th>受理人</th>
             </tr>

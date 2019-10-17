@@ -12,6 +12,7 @@ namespace Model
         public decimal amount { get; set; }
         public DateTime ctime { get; set; }
         public int state { get; set; }
+        public string creater { get; set; }
         public string modifier { get; set; }
         public DateTime? utime { get; set; }
         public DateTime? etime { get; set; }
